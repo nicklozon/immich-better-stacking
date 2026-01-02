@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'debug'
+require_relative '../lib/immich_stacker'
+
+ImmichStacker.run

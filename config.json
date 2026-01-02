@@ -1,0 +1,28 @@
+{
+  "groupings": [
+    {
+      "inclusion_operations": [
+        {
+          "field": "extension",
+          "pattern": "^(([Jj][Pp][Ee]?[Gg])|CR2|cr2)$"
+        }
+      ],
+      "criteria_operations": [
+        {
+          "field": "filename",
+          "pattern": "^(.*?)(_edit)?$",
+          "index": 1
+        },
+        {
+          "field": "directory"
+        }
+      ],
+      "parent_operations": [
+        {
+          "field": "filename",
+          "pattern": "_edit$"
+        }
+      ]
+    }
+  ]
+}
