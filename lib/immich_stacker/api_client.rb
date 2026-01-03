@@ -17,33 +17,31 @@ module ImmichStacker
 
     def fetch_all_assets
       assets = []
-      page = 1
       limit = 1000
+      params = {
+        size: limit,
+        withExif: true,
+        withStacked: true,
+        order: 'asc'
+      }
+
+      # NL: withStacked is not doing anything - items should have `stack` field, but doesn't
+      # https://github.com/immich-app/immich/issues/16180
+
       loop do
-        response = @conn.post('search/metadata', {
-          #originalFileName: 'IMG_1485', # NL: testing
-          page: page,
-          size: limit,
-          withExif: true,
-          withStacked: true
-        })
+        response = @conn.post('search/metadata', params)
         raise "Failed to fetch assets: #{response.status} #{response.body}" unless response.success?
 
         items = response.body['assets']['items']
         assets.concat(items)
 
-        # NL: withStacked is not doing anything - items should have `stack` field, but don't
-        # https://github.com/immich-app/immich/issues/16180
-        #binding.break
-
-        # NL: we're getting duplicates because the resultset is not strictly ordered, and assets are returning
-        # in a different order page to page. This causes one set of files with the same originalFileName and date/time
-        # to randomly change order. This causes there to be duplicates in `assets`, and one of the files to be missing.
-
         break if items.empty? || items.size < limit
-        page += 1
+
+        params[:takenAfter] = items.last['fileCreatedAt']
       end
-      assets
+
+      # De-duplicate assets by ID since takenAfter inclusion causes duplicates
+      assets.uniq { |a| a['id'] }
     end
 
     def create_stack(primary_asset_id:, asset_ids:)
